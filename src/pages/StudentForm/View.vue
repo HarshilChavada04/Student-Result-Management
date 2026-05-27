@@ -6,7 +6,7 @@
         <div class="row items-center no-wrap">
           <div v-if="!$q.screen.lt.lg" class="q-mr-md flex flex-center">
             <q-img
-              src="src/assets/images/ahir_samaj_logo.png"
+              src="~src/assets/images/ahir_samaj_logo.png"
               style="width: clamp(100px, 12vw, 130px); height: auto"
               fit="contain"
             />
