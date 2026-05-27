@@ -1,6 +1,10 @@
 const routes = [
   {
     path: '/',
+    redirect: '/student-form', // 👈 add this
+  },
+  {
+    path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
@@ -41,9 +45,6 @@ const routes = [
     name: 'student-form',
     meta: { label: 'Student Form', isPublic: true },
   },
-
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: '/:catchAll(.*)*',
     name: 'not-found',
