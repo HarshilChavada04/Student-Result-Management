@@ -72,7 +72,12 @@
       </div>
 
       <!-- Form Section -->
-      <q-form ref="formRef" greedy class="form-card ma-20 r-10 col smooth-scroll">
+      <q-form
+        ref="formRef"
+        greedy
+        class="form-card r-10 col smooth-scroll"
+        :class="$q.screen.lt.md ? 'ma-4' : 'ma-20'"
+      >
         <div class="form-inner" :class="$q.screen.lt.md ? 'column' : 'row full-height'">
           <!-- Personal Details -->
           <div :class="$q.screen.lt.md ? 'col-auto' : 'col'" class="pa-20">
