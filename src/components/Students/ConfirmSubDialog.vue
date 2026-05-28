@@ -60,6 +60,10 @@ const props = defineProps({
   resultFile: { type: [File, null], default: null },
   /** 'en' | 'gu' */
   lang: { type: String, default: 'en' },
+  degreeOptions: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
@@ -137,41 +141,45 @@ const detailRows = computed(() => {
 
   const rows = [
     // Personal Details section (same order as in the template)
-    { key: 'first-name', label: t('firstName'), value: f['first-name'] || na },
-    { key: 'middle-name', label: t('middleName'), value: f['middle-name'] || na },
-    { key: 'last-name', label: t('lastName'), value: f['last-name'] || na },
-    { key: 'mother-name', label: t('motherName'), value: f['mother-name'] || na },
-    { key: 'parent-phone-number', label: t('parentPhone'), value: f['parent-phone-number'] || na },
-    { key: 'whatsapp-number', label: t('whatsappNumber'), value: f['whatsapp-number'] || na },
-    { key: 'email-id', label: t('emailId'), value: f['email-id'] || na },
+    { key: 'first-name', label: t('firstName'), value: f['first_name'] || na },
+    { key: 'middle-name', label: t('middleName'), value: f['middle_name'] || na },
+    { key: 'last-name', label: t('lastName'), value: f['last_name'] || na },
+    { key: 'mother-name', label: t('motherName'), value: f['mother_name'] || na },
+    { key: 'parent-phone-number', label: t('parentPhone'), value: f['parents_phone'] || na },
+    { key: 'whatsapp-number', label: t('whatsappNumber'), value: f['whatsapp_number'] || na },
+    { key: 'email-id', label: t('emailId'), value: f['email'] || na },
     {
       key: 'student-phone-number',
       label: t('studentPhone'),
-      value: f['student-phone-number'] || na,
+      value: f['student_phone'] || na,
     },
     {
       key: 'residential-address',
       label: t('residentialAddress'),
-      value: f['residential-address'] || na,
+      value: f['residential_address'] || na,
     },
   ]
 
   // Academic Details — school vs college (mirrors the v-if/v-if in the template)
   if (props.institutionType === 'school') {
     rows.push(
-      { key: 'standard', label: t('standard'), value: f['standard'] || na },
-      { key: 'board', label: t('board'), value: f['board'] || na },
+      { key: 'standard', label: t('standard'), value: f['school_standard_id'] || na },
+      { key: 'board', label: t('board'), value: f['school_board_id'] || na },
     )
   } else {
     rows.push(
-      { key: 'degree', label: t('degree'), value: f['degree'] || na },
+      {
+        key: 'degree',
+        label: t('degree'),
+        value: props.degreeOptions.find((item) => item.key === f['college_degree_id']).value || na,
+      },
       { key: 'semester', label: t('semester'), value: f['semester'] || na },
-      { key: 'university', label: t('university'), value: f['university'] || na },
+      { key: 'university', label: t('university'), value: f['university_name'] || na },
     )
   }
 
   rows.push(
-    { key: 'year', label: t('year'), value: f['year'] || na },
+    { key: 'year', label: t('year'), value: f['result_year'] || na },
     { key: 'percentage', label: t('percentage'), value: f['percentage'] || na },
     {
       key: 'attachment',

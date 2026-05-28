@@ -72,7 +72,7 @@
       </div>
 
       <!-- Form Section -->
-      <q-form class="form-card ma-20 r-10 col smooth-scroll">
+      <q-form ref="formRef" greedy class="form-card ma-20 r-10 col smooth-scroll">
         <div class="form-inner" :class="$q.screen.lt.md ? 'column' : 'row full-height'">
           <!-- Personal Details -->
           <div :class="$q.screen.lt.md ? 'col-auto' : 'col'" class="pa-20">
@@ -244,6 +244,7 @@
       <ConfirmSubDialog
         v-model="showConfirmDialog"
         :form="form"
+        :degree-options="degreeOptions"
         :institution-type="institutionType"
         :result-file="resultFile"
         :lang="lang"
@@ -276,6 +277,8 @@ const $q = useQuasar()
 
 // ── Language ──────────────────────────────────────────────────────────────────
 const lang = ref('gu') // 'en' | 'gu'
+
+const formRef = ref(null)
 
 const translations = {
   en: {
@@ -389,22 +392,46 @@ const showClearDialog = ref(false)
 const blnLoading = ref(false)
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
-function handleSubmit() {
-  // TODO: add your validation logic here before opening the dialog
-  showConfirmDialog.value = true
+async function handleSubmit() {
+  const valid = await formRef.value.validate()
+  if (valid) {
+    showConfirmDialog.value = true
+  }
 }
 
 async function submitToApi() {
   const formData = new FormData()
-  Object.entries(form).forEach(([key, value]) => {
-    formData.append(key, value)
-  })
+
+  const commonFields = [
+    'first_name',
+    'middle_name',
+    'last_name',
+    'mother_name',
+    'parents_phone',
+    'whatsapp_number',
+    'email',
+    'student_phone',
+    'residential_address',
+    'result_year',
+    'percentage',
+  ]
+  commonFields.forEach((key) => formData.append(key, form[key] ?? ''))
+
   formData.append('student_type', institutionType.value)
-  if (resultFile.value) {
-    formData.append('result_image', resultFile.value)
+
+  if (institutionType.value === 'school') {
+    formData.append('school_standard_id', form.school_standard_id ?? '')
+    formData.append('school_board_id', form.school_board_id ?? '')
+  } else {
+    formData.append('college_degree_id', form.college_degree_id ?? '')
+    formData.append('semester', form.semester ?? '')
+    if (form.university_name) formData.append('university_name', form.university_name)
   }
+
+  if (resultFile.value) formData.append('result_image', resultFile.value)
+
   api.post('/submissions', formData).then((response) => {
-    if (response && response.status === 200) {
+    if (response?.status === 200) {
       console.log(response)
     }
   })
