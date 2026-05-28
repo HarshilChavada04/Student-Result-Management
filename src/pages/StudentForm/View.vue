@@ -271,6 +271,7 @@ import BaseFileUpload from 'src/components/General/BaseFileUpload.vue'
 import ClearFormDialog from 'src/components/Students/ClearFormDialog.vue'
 import ConfirmSubDialog from 'src/components/Students/ConfirmSubDialog.vue'
 import { yearOptions } from 'src/Helpers/dropDowns'
+import { showSuccess } from 'src/boot/notification'
 import { api } from 'src/boot/axios'
 
 const $q = useQuasar()
@@ -285,6 +286,7 @@ const translations = {
     orgName: 'Ahir Samaj',
     formTitle: 'Student Result Submission Form',
     formSubtitle: 'Please fill in the details below',
+    formSubmissionMsg: 'Form submitted successfully',
     personalDetails: 'Personal Details',
     firstName: 'First Name',
     middleName: 'Middle Name',
@@ -314,6 +316,7 @@ const translations = {
     orgName: 'આહિર સમાજ',
     formTitle: 'વિદ્યાર્થી પરિણામ સબમિશન ફોર્મ',
     formSubtitle: 'કૃપા કરીને નીચે વિગતો ભરો',
+    formSubmissionMsg: 'ફોર્મ સફળતાપૂર્વક સબમિટ થયું',
     personalDetails: 'વ્યક્તિગત વિગતો',
     firstName: 'પ્રથમ નામ',
     middleName: 'મધ્ય નામ',
@@ -430,11 +433,17 @@ async function submitToApi() {
 
   if (resultFile.value) formData.append('result_image', resultFile.value)
 
-  api.post('/submissions', formData).then((response) => {
-    if (response?.status === 200) {
-      console.log(response)
-    }
-  })
+  blnLoading.value = true
+  api
+    .post('/submissions', formData)
+    .then((response) => {
+      if (response?.status === 200) {
+        showSuccess(t('formSubmissionMsg'))
+      }
+    })
+    .finally(() => {
+      blnLoading.value = false
+    })
 }
 
 function handleClear() {
