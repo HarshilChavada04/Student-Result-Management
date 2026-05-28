@@ -9,6 +9,8 @@ import axios from 'axios'
 // for each client)
 
 const PROJECT_BASE_URL = import.meta.env.VITE_PROJECT_BASE_URL
+console.log(PROJECT_BASE_URL)
+
 const api = axios.create({ baseURL: PROJECT_BASE_URL })
 
 export default defineBoot(({ app }) => {
