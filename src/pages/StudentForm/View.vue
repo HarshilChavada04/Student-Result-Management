@@ -442,7 +442,7 @@ async function submitToApi() {
   api
     .post('/submissions', formData)
     .then((response) => {
-      if (response?.status === 200) {
+      if (response?.status === 200 || response?.status === 201) {
         showSuccess(t('formSubmissionMsg'))
       }
     })
