@@ -39,10 +39,7 @@
       style="top: 100px; right: -16px"
     >
       <template v-slot:default>
-        <q-icon
-          :name="miniState ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left'"
-          class="font-18"
-        ></q-icon>
+        <q-icon :name="miniState ? 'chevron_right' : 'chevron_left'" class="font-18"></q-icon>
       </template>
     </q-btn>
   </q-drawer>
@@ -59,7 +56,7 @@ import { getFilteredRoutes } from 'src/Helpers/routeHelpers'
 const auth = useAuthStore()
 const miniState = ref(auth.getSideBarPreference ?? false)
 const currentRoute = useRoute()
-const menuRoutes = getFilteredRoutes(routes[0].children)
+const menuRoutes = getFilteredRoutes(routes[1].children)
 // const menuRoutes = routes[0].children
 //   .filter((item) => item.meta?.show_in_menu && item.meta?.is_active === 1)
 //   .sort((a, b) => (a.meta?.seq_no || 0) - (b.meta?.seq_no || 0))

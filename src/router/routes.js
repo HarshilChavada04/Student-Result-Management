@@ -1,7 +1,7 @@
 const routes = [
   {
     path: '/',
-    redirect: '/student-form', // 👈 add this
+    redirect: '/student-form',
   },
   {
     path: '/',
@@ -12,11 +12,11 @@ const routes = [
         name: 'dashboard',
         component: () => import('pages/Dashboard/View.vue'),
         meta: {
-          icon: 'fa-solid fa-table-columns',
+          icon: 'dashboard', // Material Icon
           label: 'Dashboard',
-          show_in_menu: true,
+          show_in_menu: false,
           seq_no: 1,
-          is_active: 1,
+          is_active: 0,
         },
       },
       {
@@ -24,7 +24,7 @@ const routes = [
         name: 'students',
         component: () => import('pages/Students/View.vue'),
         meta: {
-          icon: 'fa-solid fa-graduation-cap',
+          icon: 'school', // Material Icon
           label: 'Students',
           show_in_menu: true,
           seq_no: 2,

@@ -1,3 +1,4 @@
+q
 <template>
   <base-dialog v-model:show-dialog="isOpen" title="Student Details">
     <!-- Body -->
@@ -19,6 +20,7 @@
 </template>
 
 <script setup>
+import { date } from 'quasar'
 import { computed } from 'vue'
 import BaseDialog from 'src/components/General/BaseDialog.vue'
 import BaseBtn from 'src/components/General/BaseBtn.vue'
@@ -42,19 +44,25 @@ const isOpen = computed({
 })
 
 const detailRows = computed(() => [
-  { label: 'Student ID', value: props.student.studentId },
-  { label: 'Student Name', value: props.student.studentName },
-  { label: "Father's Name", value: props.student.fatherName },
-  { label: "Mother's Name", value: props.student.motherName },
-  { label: 'WhatsApp Number', value: props.student.whatsappNumber },
+  { label: 'Student Name', value: props.student.full_name },
+  { label: "Mother's Name", value: props.student.mother_name },
+  { label: 'Parent Phone Number', value: props.student.parents_phone },
+  { label: 'WhatsApp Number', value: props.student.whatsapp_number },
+  { label: 'Student Phone Number', value: props.student.student_phone },
   { label: 'Other Contact Number', value: props.student.otherContactNumber },
-  { label: 'Home Address', value: props.student.homeAddress },
+  { label: 'Home Address', value: props.student.residential_address },
   { label: 'Email ID', value: props.student.email },
-  { label: 'Parent Phone Number', value: props.student.phoneNumber },
-  { label: 'Standard', value: props.student.standard },
+  { label: 'Category Type', value: props.student.student_type_display },
+  { label: 'Standard/Degree', value: props.student.standard_degree },
+  { label: 'Result Year', value: props.student.result_year },
   { label: 'Percentage', value: props.student.percentage },
-  { label: 'Board', value: props.student.board },
+  { label: 'Board', value: props.student.school_board_id },
+  { label: 'Submitted At', value: formatDateTime(props.student.submitted_at) },
 ])
+
+const formatDateTime = (strDateTime) => {
+  return date.formatDate(strDateTime, "DD MMM 'YY")
+}
 </script>
 
 <style scoped lang="scss">

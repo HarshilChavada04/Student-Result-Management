@@ -39,12 +39,12 @@
 
               <q-form class="row justify-center gap-30 q-mt-lg">
                 <base-input
-                  v-model="strAdminId"
+                  v-model="strAdminEmailId"
                   class="col-12"
-                  label="Admin ID"
+                  label="Admin Email ID"
                   label-class="font-medium"
-                  placeholder="Enter admin id"
-                  icon-name="fa-light fa-user"
+                  placeholder="Enter admin email id"
+                  icon-name="person"
                 />
 
                 <base-input
@@ -53,7 +53,7 @@
                   label="Password"
                   label-class="font-medium"
                   placeholder="Enter password"
-                  icon-name="fa-light fa-lock"
+                  icon-name="lock"
                 />
 
                 <base-btn
@@ -102,22 +102,22 @@ const arrCarouselData = [
 
 const { redirectTo } = useNavigation()
 
-const strAdminId = ref('')
+const strAdminEmailId = ref('')
 const strPassword = ref('')
 const blnLoading = ref(false)
 
 const handleLogin = () => {
   const objBody = {
-    identifier: strAdminId.value,
+    email: strAdminEmailId.value,
     password: strPassword.value,
   }
   blnLoading.value = true
   api
-    .post('/v1/login', objBody)
+    .post('/admin/login', objBody)
     .then((response) => {
       if (response && response.status === 200) {
-        auth.setToken(response.data.access_token)
-        redirectTo('dashboard')
+        auth.setToken(response.data.token)
+        redirectTo('students')
         showSuccess('Login Successfully')
       }
     })

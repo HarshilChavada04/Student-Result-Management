@@ -146,7 +146,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 function redirectToFirstAssignedLeftMenu() {
-  router.push('/dashboard')
+  router.push('/students')
 }
 </script>
 <style lang="scss">

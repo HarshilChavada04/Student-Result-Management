@@ -118,11 +118,7 @@
           v-if="clearable && ((multiple && modelVal.length) || (!multiple && modelVal))"
           v-slot:append
         >
-          <q-icon
-            name="fa-regular fa-circle-xmark"
-            class="cursor-pointer font-14 text-black"
-            @click="clearModel"
-          />
+          <q-icon name="close" class="cursor-pointer font-14 text-black" @click="clearModel" />
         </template>
       </q-select>
     </div>

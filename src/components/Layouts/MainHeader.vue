@@ -5,13 +5,15 @@
     </div>
     <div class="row gap-20">
       <base-btn variant="flat" round @click="logout">
-        <q-icon name="fa-solid fa-arrow-right-from-bracket" size="xs" />
+        <q-icon name="logout" size="xs" />
         <base-tooltip>Logout</base-tooltip>
       </base-btn>
     </div>
   </div>
 </template>
 <script setup>
+import { api } from 'src/boot/axios'
+import { showSuccess } from 'src/boot/notification'
 import BaseBtn from 'src/components/General/BaseBtn.vue'
 import BaseTooltip from 'src/components/General/BaseTooltip.vue'
 import { useCurrentLabel } from 'src/composables/useCurrentLabel'
@@ -23,8 +25,13 @@ const auth = useAuthStore()
 const router = useRouter()
 
 function logout() {
-  auth.logout()
-  router.push('/login')
+  api.post('/admin/logout').then((response) => {
+    if (response && response.status === 200) {
+      showSuccess(response?.data?.message)
+      auth.logout()
+      router.push('/login')
+    }
+  })
 }
 </script>
 

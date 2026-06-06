@@ -9,7 +9,7 @@
         </span>
         <q-icon
           v-show="showCopyEmailIcon"
-          name="fa-solid fa-copy"
+          name="content_copy"
           class="font-10 cursor-pointer ml-2 text-info"
           @click="copyEmail"
         >

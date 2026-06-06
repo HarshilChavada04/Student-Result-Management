@@ -25,11 +25,11 @@
       hide-bottom-space
     >
       <template v-if="iconName" v-slot:prepend>
-        <q-icon :name="iconName" class="font-16 text-black mr-5"></q-icon>
+        <q-icon :name="iconName" class="font-22 text-black mr-5"></q-icon>
       </template>
       <template v-if="clearable && modelValue.trim().length > 0" v-slot:append>
         <q-icon
-          name="fa-regular fa-circle-xmark"
+          name="close"
           @click.stop.prevent="emit('update:modelValue', '')"
           class="cursor-pointer font-14 text-black"
         />

@@ -19,7 +19,7 @@
         <div class="font-18 font-medium" style="letter-spacing: 0.09px">{{ title }}</div>
         <base-btn
           variant="text"
-          icon="fa-solid fa-xmark"
+          icon="close"
           round
           fontSize="font-12"
           color="black"
