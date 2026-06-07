@@ -17,18 +17,23 @@
       <!-- Content -->
       <q-card-section class="col scroll">
         <!-- Result Preview -->
+        <!-- Result Preview -->
         <div class="q-mb-xl">
-          <!-- PDF -->
-          <iframe
-            v-if="isPdf"
-            :src="student?.result_image_url"
-            width="100%"
-            height="700"
-            style="border: none"
-          />
+          <div
+            v-for="(file, index) in student?.result_image_urls || []"
+            :key="index"
+            class="q-mb-lg"
+          >
+            <!-- PDF -->
+            <iframe v-if="isPdf(file)" :src="file" width="100%" height="700" style="border: none" />
 
-          <!-- Image -->
-          <q-img v-else :src="student?.result_image_url" fit="contain" style="max-height: 700px" />
+            <!-- Image -->
+            <q-img v-else :src="file" fit="contain" style="max-height: 700px" />
+          </div>
+
+          <div v-if="!student?.result_image_urls?.length" class="text-grey text-center q-pa-lg">
+            No result files available
+          </div>
         </div>
 
         <!-- Student Details -->
@@ -91,6 +96,7 @@
           label="Reject"
           unelevated
           @click="handleStatus('rejected')"
+          :loading="objLoading['rejected']"
         />
 
         <q-btn
@@ -98,15 +104,24 @@
           icon="check"
           label="Approve"
           unelevated
-          @click="handleStatus('approved')"
+          @click="handleStatus('verified')"
+          :loading="objLoading['verified']"
         />
       </q-card-actions>
     </q-card>
   </q-dialog>
+  <ConfirmationDialog
+    v-model="showConfirmationDialog"
+    :status="selectedStatus"
+    @confirm="handleConfirm"
+  />
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref } from 'vue'
+import ConfirmationDialog from './ConfirmationDialog.vue'
+import { api } from 'src/boot/axios.js'
+import { showSuccess, showError } from 'src/boot/notification'
 
 const props = defineProps({
   modelValue: {
@@ -122,20 +137,147 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'status-change'])
 
-const isPdf = computed(() => {
-  const url = props.student?.result_image_url || ''
-
-  return (
-    url.includes('.pdf') ||
-    url.includes('/raw/upload/') ||
-    props.student?.result_file_type === 'pdf'
-  )
+const showConfirmationDialog = ref(false)
+const selectedStatus = ref('')
+const objLoading = ref({
+  rejected: false,
+  verified: false,
 })
 
+const openWhatsApp = (status, rejectionReason = '') => {
+  const phone = props.student?.whatsapp_number
+
+  if (!phone) return
+
+  const cleanPhone = phone.replace(/\D/g, '')
+
+  let message = ''
+
+  if (status === 'verified') {
+    message = `✅ RESULT APPROVED
+
+Dear Student,
+
+Your result submission has been successfully approved.
+
+📚 Student Name: ${props.student?.full_name}
+📅 Result Year: ${props.student?.result_year}
+🎓 Standard / Degree: ${props.student?.standard_degree || '-'}
+
+${props.student?.student_type === 'college' ? `🏫 Semester: ${props.student?.semester || '-'}` : ''}
+
+📊 Percentage: ${props.student?.percentage || '-'}%
+
+Thank you for participating.
+
+━━━━━━━━━━━━━━━━━━━━
+
+✅ પરિણામ મંજૂર
+
+પ્રિય વિદ્યાર્થી,
+
+તમારું પરિણામ સફળતાપૂર્વક મંજૂર કરવામાં આવ્યું છે.
+
+📚 વિદ્યાર્થીનું નામ: ${props.student?.full_name}
+📅 પરિણામ વર્ષ: ${props.student?.result_year}
+🎓 ધોરણ / ડિગ્રી: ${props.student?.standard_degree || '-'}
+
+${props.student?.student_type === 'college' ? `🏫 સેમેસ્ટર: ${props.student?.semester || '-'}` : ''}
+
+📊 ટકાવારી: ${props.student?.percentage || '-'}%
+
+આપનો અભ્યાસ અને મહેનત બદલ અભિનંદન.
+
+- Result Management Team`
+  } else {
+    message = `❌ RESULT REJECTED
+
+Dear Student,
+
+Unfortunately, your result submission could not be approved.
+
+📚 Student Name: ${props.student?.full_name}
+📅 Result Year: ${props.student?.result_year}
+🎓 Standard / Degree: ${props.student?.standard_degree || '-'}
+
+${props.student?.student_type === 'college' ? `🏫 Semester: ${props.student?.semester || '-'}` : ''}
+
+📊 Percentage: ${props.student?.percentage || '-'}%
+
+📝 Reason:
+${rejectionReason || 'Not specified'}
+
+For further assistance, please contact the administrator.
+
+━━━━━━━━━━━━━━━━━━━━
+
+❌ પરિણામ નામંજૂર
+
+પ્રિય વિદ્યાર્થી,
+
+દુઃખ સાથે જણાવવાનું કે તમારું પરિણામ હાલમાં મંજૂર કરવામાં આવ્યું નથી.
+
+📚 વિદ્યાર્થીનું નામ: ${props.student?.full_name}
+📅 પરિણામ વર્ષ: ${props.student?.result_year}
+🎓 ધોરણ / ડિગ્રી: ${props.student?.standard_degree || '-'}
+
+${props.student?.student_type === 'college' ? `🏫 સેમેસ્ટર: ${props.student?.semester || '-'}` : ''}
+
+📊 ટકાવારી: ${props.student?.percentage || '-'}%
+
+📝 કારણ:
+${rejectionReason || 'ઉલ્લેખિત નથી'}
+
+વધુ માહિતી માટે કૃપા કરીને એડમિનનો સંપર્ક કરો.
+
+- Result Management Team`
+  }
+
+  const whatsappUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(message)}`
+
+  window.open(whatsappUrl, '_blank')
+}
+
+const isPdf = (url) => {
+  if (!url) return false
+
+  return url.includes('.pdf') || url.includes('/raw/upload/')
+}
+
 const handleStatus = (status) => {
-  emit('status-change', {
-    studentId: props.student.id,
-    status,
-  })
+  selectedStatus.value = status
+  showConfirmationDialog.value = true
+}
+
+const handleConfirm = async (reason) => {
+  try {
+    const id = props.student.id
+    const action = selectedStatus.value === 'verified' ? 'approve' : 'reject'
+
+    objLoading.value[selectedStatus.value] = true
+    await api
+      .patch(`/admin/submissions/${id}/${action}`, {
+        rejection_reason: reason,
+      })
+      .then((response) => {
+        if (response && response.status === 200) {
+          showSuccess(response?.data?.message)
+          openWhatsApp(selectedStatus.value, reason)
+        }
+      })
+      .finally(() => {
+        objLoading.value[selectedStatus.value] = false
+      })
+
+    emit('status-change', {
+      studentId: id,
+      status: selectedStatus.value,
+      rejectionReason: reason,
+    })
+
+    emit('update:modelValue', false)
+  } catch (error) {
+    showError(error)
+  }
 }
 </script>

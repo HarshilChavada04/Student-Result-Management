@@ -81,7 +81,7 @@
               class="text-capitalize r-6 font-medium px-8 py-3"
               :class="getStatusStyles(props.value)"
             >
-              {{ props.value }}
+              {{ props.value === 'verified' ? 'Approved' : props.value }}
             </span>
           </div>
         </q-td>
@@ -606,7 +606,7 @@ const arrColumns = ref([
 
 const getStatusStyles = (strStatus) => {
   const statusMap = {
-    approved: 'text-positive bg-positive-bg',
+    verified: 'text-positive bg-positive-bg',
     pending: 'text-warning bg-warning-bg',
     rejected: 'text-negative bg-negative-bg',
   }

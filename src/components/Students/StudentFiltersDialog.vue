@@ -200,7 +200,7 @@ const semesterOptions = [
 const statusOptions = [
   { label: 'All', value: null },
   { label: 'Pending', value: 'pending' },
-  { label: 'Approved', value: 'approved' },
+  { label: 'Approved', value: 'verified' },
   { label: 'Rejected', value: 'rejected' },
 ]
 
