@@ -488,7 +488,7 @@ const arrKpiCardsData = computed(() => {
   ).length
 
   const approvedStudents = students.filter(
-    (student) => student.submission_status === 'approved',
+    (student) => student.submission_status === 'verified',
   ).length
 
   const rejectedStudents = students.filter(
