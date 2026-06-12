@@ -28,7 +28,28 @@
             <iframe v-if="isPdf(file)" :src="file" width="100%" height="700" style="border: none" />
 
             <!-- Image -->
-            <q-img v-else :src="file" fit="contain" style="max-height: 700px" />
+            <div v-else class="relative-position">
+              <q-btn
+                icon="rotate_right"
+                color="primary"
+                round
+                dense
+                class="absolute-top-right q-ma-md"
+                style="z-index: 1000"
+                @click="rotateImage(index)"
+              >
+                <q-tooltip>Rotate Image</q-tooltip>
+              </q-btn>
+
+              <div
+                :style="{
+                  transform: `rotate(${imageRotations[index] || 0}deg)`,
+                  transition: 'transform 0.3s ease',
+                }"
+              >
+                <q-img :src="file" fit="contain" style="max-height: 700px" />
+              </div>
+            </div>
           </div>
 
           <div v-if="!student?.result_image_urls?.length" class="text-grey text-center q-pa-lg">
@@ -89,7 +110,7 @@
       <q-separator />
 
       <!-- Footer -->
-      <q-card-actions align="right" class="q-pa-md">
+      <q-card-actions v-if="student.submission_status === 'pending'" align="right" class="q-pa-md">
         <q-btn
           color="negative"
           icon="close"
@@ -143,6 +164,12 @@ const objLoading = ref({
   rejected: false,
   verified: false,
 })
+
+const imageRotations = ref({})
+
+const rotateImage = (index) => {
+  imageRotations.value[index] = (imageRotations.value[index] || 0) + 90
+}
 
 const openWhatsApp = (status, rejectionReason = '') => {
   const phone = props.student?.whatsapp_number

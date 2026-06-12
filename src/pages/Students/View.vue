@@ -166,7 +166,7 @@
     <ReviewSubmissionDialog
       v-model="blnShowResultDialog"
       :student="objReviewStudent"
-      @status-change="handleStudentStatus"
+      @status-change="fetchStudentsData"
     />
   </div>
 </template>
