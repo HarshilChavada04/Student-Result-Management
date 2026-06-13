@@ -195,6 +195,13 @@
                   min-width="100%"
                   :use-input="true"
                 />
+                <base-input
+                  v-if="form.college_degree_id === 'other'"
+                  v-model="form.other_degree_name"
+                  :label="t('otherDegree')"
+                  mandatory
+                  min-width="100%"
+                />
                 <base-select
                   v-model="form.semester"
                   :arr-options="semesterOptions"
@@ -309,6 +316,7 @@ const translations = {
     standard: 'Standard',
     board: 'Board',
     degree: 'Degree',
+    otherDegree: 'Other Degree',
     semester: 'Semester',
     university: 'University (Optional)',
     year: 'Year',
@@ -339,6 +347,7 @@ const translations = {
     standard: 'ધોરણ',
     board: 'બોર્ડ',
     degree: 'ડિગ્રી',
+    otherDegree: 'અન્ય ડિગ્રી',
     semester: 'સેમેસ્ટર',
     university: 'યુનિવર્સિટી (વૈકલ્પિક)',
     year: 'વર્ષ',
@@ -389,6 +398,7 @@ const form = reactive({
   school_standard_id: '',
   school_board_id: '',
   college_degree_id: '',
+  other_degree_name: '',
   semester: '',
   university_name: '',
   result_year: '',
@@ -433,6 +443,7 @@ async function submitToApi() {
   } else {
     formData.append('college_degree_id', form.college_degree_id ?? '')
     formData.append('semester', form.semester ?? '')
+    formData.append('other_degree_name', form.other_degree_name ?? '')
     if (form.university_name) formData.append('university_name', form.university_name)
   }
 

@@ -101,6 +101,7 @@
                   props.row.student_type === 'school'
                     ? props.row.school_standard_id
                     : props.row.college_degree_id,
+                  props.row,
                 )
               }}
             </q-td>
@@ -381,6 +382,7 @@ const openResultDialog = (student) => {
     standard_degree: getSchoolDegreeValue(
       student.student_type,
       student.student_type === 'school' ? student.school_standard_id : student.college_degree_id,
+      student,
     ),
   }
 
@@ -398,13 +400,17 @@ const fetchStudentsData = async () => {
   }
 }
 
-const getSchoolDegreeValue = (strCategoryType, strValue) => {
+const getSchoolDegreeValue = (strCategoryType, strValue, row = null) => {
   if (strCategoryType === 'school') {
     const standard = arrStandardsData.value.find((item) => item.key == strValue)
     return standard?.value || '-'
   }
 
   const degree = arrDegreeData.value.find((item) => item.key == strValue)
+
+  if (degree?.key === 'other') {
+    return `Other - ${row?.other_degree_name || '-'}`
+  }
 
   return degree?.value || '-'
 }
@@ -420,6 +426,7 @@ const viewOtherDetails = (student) => {
     standard_degree: getSchoolDegreeValue(
       student.student_type,
       student.student_type === 'school' ? student.school_standard_id : student.college_degree_id,
+      student,
     ),
 
     submitted_date: formatDateTime(student.submitted_at),
@@ -590,6 +597,7 @@ const groupedStudents = computed(() => {
     const standardDegree = getSchoolDegreeValue(
       student.student_type,
       student.student_type === 'school' ? student.school_standard_id : student.college_degree_id,
+      student,
     )
 
     const semesterLabel = student.semester ? `Semester ${student.semester}` : null
@@ -724,6 +732,7 @@ const getExportValue = (row, col) => {
     return getSchoolDegreeValue(
       row.student_type,
       row.student_type === 'school' ? row.school_standard_id : row.college_degree_id,
+      row,
     )
   }
 

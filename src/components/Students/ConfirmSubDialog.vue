@@ -94,6 +94,7 @@ const translations = {
     standard: 'Standard',
     board: 'Board',
     degree: 'Degree',
+    otherDegree: 'Other Degree Name',
     semester: 'Semester',
     university: 'University',
     year: 'Year',
@@ -119,6 +120,7 @@ const translations = {
     standard: 'ધોરણ',
     board: 'બોર્ડ',
     degree: 'ડિગ્રી',
+    otherDegree: 'અન્ય ડિગ્રીનું નામ',
     semester: 'સેમેસ્ટર',
     university: 'યુનિવર્સિટી',
     year: 'વર્ષ',
@@ -167,12 +169,21 @@ const detailRows = computed(() => {
       { key: 'board', label: t('board'), value: f['school_board_id'] || na },
     )
   } else {
+    rows.push({
+      key: 'degree',
+      label: t('degree'),
+      value: props.degreeOptions.find((item) => item.key === f['college_degree_id'])?.value || na,
+    })
+
+    if (f['college_degree_id'] === 'other') {
+      rows.push({
+        key: 'other-degree-name',
+        label: t('otherDegree'),
+        value: f['other_degree_name'] || na,
+      })
+    }
+
     rows.push(
-      {
-        key: 'degree',
-        label: t('degree'),
-        value: props.degreeOptions.find((item) => item.key === f['college_degree_id']).value || na,
-      },
       { key: 'semester', label: t('semester'), value: f['semester'] || na },
       { key: 'university', label: t('university'), value: f['university_name'] || na },
     )
