@@ -29,11 +29,12 @@
               v-model="filters.studentType"
               :options="studentTypeOptions"
               label="School / College"
+              @update:model-value="onStudentTypeChange"
             />
           </div>
 
-          <!-- Standard -->
-          <div class="col-12 col-md-4">
+          <!-- Standard (only for School) -->
+          <div class="col-12 col-md-4" v-if="filters.studentType !== 'college'">
             <q-select
               outlined
               dense
@@ -42,6 +43,19 @@
               v-model="filters.standard"
               :options="standardOptions"
               label="Standard"
+            />
+          </div>
+
+          <!-- Degree (only for College) -->
+          <div class="col-12 col-md-4" v-if="filters.studentType !== 'school'">
+            <q-select
+              outlined
+              dense
+              emit-value
+              map-options
+              v-model="filters.degree"
+              :options="degreeOptions"
+              label="Degree"
             />
           </div>
 
@@ -71,19 +85,6 @@
             />
           </div>
 
-          <!-- Degree -->
-          <div class="col-12 col-md-4">
-            <q-select
-              outlined
-              dense
-              emit-value
-              map-options
-              v-model="filters.degree"
-              :options="degreeOptions"
-              label="Degree"
-            />
-          </div>
-
           <!-- Semester -->
           <div class="col-12 col-md-4">
             <q-select
@@ -103,7 +104,7 @@
               outlined
               dense
               type="number"
-              v-model="filters.percentageFrom"
+              v-model.number="filters.percentageFrom"
               label="Percentage From"
             />
           </div>
@@ -114,14 +115,20 @@
               outlined
               dense
               type="number"
-              v-model="filters.percentageTo"
+              v-model.number="filters.percentageTo"
               label="Percentage To"
             />
           </div>
 
           <!-- Rank -->
           <div class="col-12 col-md-4">
-            <q-input outlined dense type="number" v-model="filters.rank" label="Rank (Top N)" />
+            <q-input
+              outlined
+              dense
+              type="number"
+              v-model.number="filters.rank"
+              label="Rank (Top N)"
+            />
           </div>
 
           <!-- Status -->
@@ -142,7 +149,7 @@
       <q-card-actions align="center" class="q-pb-lg">
         <q-btn outline label="Reset" class="q-px-xl" @click="resetFilters" />
 
-        <q-btn color="primary" label="Apply Filters" class="q-px-xl" @click="applyFilters" />
+        <q-btn color="primary" label="Apply Filters" class="q-px-xl" @click="onApplyFilters" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -155,6 +162,7 @@ const props = defineProps({
   modelValue: Boolean,
   standardOptions: Array,
   degreeOptions: Array,
+  boardOptions: Array,
 })
 
 const emit = defineEmits(['update:modelValue', 'apply-filters'])
@@ -164,14 +172,14 @@ const dialog = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-const filters = ref({
+const getDefaultFilters = () => ({
   studentName: '',
   phone: '',
   studentType: null,
   standard: null,
+  degree: null,
   board: null,
   year: null,
-  degree: null,
   semester: null,
   percentageFrom: null,
   percentageTo: null,
@@ -179,15 +187,13 @@ const filters = ref({
   status: null,
 })
 
+const filters = ref(getDefaultFilters())
+
 const studentTypeOptions = [
   { label: 'All', value: null },
   { label: 'School', value: 'school' },
   { label: 'College', value: 'college' },
 ]
-
-const boardOptions = [{ label: 'All', value: null }]
-
-const yearOptions = [{ label: 'All', value: null }]
 
 const semesterOptions = [
   { label: 'All', value: null },
@@ -204,24 +210,31 @@ const statusOptions = [
   { label: 'Rejected', value: 'rejected' },
 ]
 
-const resetFilters = () => {
-  filters.value = {
-    studentName: '',
-    phone: '',
-    studentType: null,
-    standard: null,
-    board: null,
-    year: null,
-    degree: null,
-    semester: null,
-    percentageFrom: null,
-    percentageTo: null,
-    rank: null,
-    status: null,
+const currentYear = new Date().getFullYear()
+
+const yearOptions = [
+  { label: 'All', value: null },
+  { label: `${currentYear}`, value: currentYear },
+  { label: `${currentYear - 1}`, value: currentYear - 1 },
+]
+
+const onStudentTypeChange = (value) => {
+  // Clear out the irrelevant filter when switching type
+  if (value === 'school') {
+    filters.value.degree = null
+  } else if (value === 'college') {
+    filters.value.standard = null
+  } else {
+    filters.value.standard = null
+    filters.value.degree = null
   }
 }
 
-const applyFilters = () => {
+const resetFilters = () => {
+  filters.value = getDefaultFilters()
+}
+
+const onApplyFilters = () => {
   emit('apply-filters', { ...filters.value })
   dialog.value = false
 }

@@ -55,92 +55,77 @@
     </div>
 
     <!-- Table Listing Data -->
-    <q-table
-      :columns="arrColumns"
-      :rows="arrStudentsData"
-      :loading="blnLoading"
-      class="table-class"
-      separator="horizontal"
-    >
-      <template v-slot:no-data="props">
-        <q-tr class="full-width row justify-center" :props="props">
-          {{ props.message }}
-        </q-tr>
-      </template>
+    <!-- Table Listing Data -->
+    <div v-if="blnLoading" class="column items-center justify-center q-py-xl">
+      <q-spinner color="primary" size="3em" />
+      <div class="font-14 text-grey-8 q-mt-sm">Loading students data...</div>
+    </div>
 
-      <template v-slot:loading>
-        <q-inner-loading showing color="primary">
-          <q-spinner-dots size="50px" />
-        </q-inner-loading>
-      </template>
+    <div v-else>
+      <div v-for="[groupName, students] in groupedStudents" :key="groupName" class="q-mb-xl">
+        <div class="text-h6 text-white text-center bg-primary">
+          {{ groupName }}
+        </div>
 
-      <template v-slot:body-cell-status="props">
-        <q-td :props="props">
-          <div>
-            <span
-              class="text-capitalize r-6 font-medium px-8 py-3"
-              :class="getStatusStyles(props.value)"
-            >
-              {{ props.value === 'verified' ? 'Approved' : props.value }}
-            </span>
-          </div>
-        </q-td>
-      </template>
+        <q-table
+          :rows="students"
+          :columns="displayColumns"
+          flat
+          bordered
+          hide-bottom
+          separator="horizontal"
+          :rows-per-page-options="[0]"
+        >
+          <template #body-cell-rank="props">
+            <q-td :props="props">
+              {{ props.row.rank || '-' }}
+            </q-td>
+          </template>
 
-      <template v-slot:body-cell-semester="props">
-        <q-td :props="props">
-          <span>
-            {{ props.value ? `Sem. ${props.value}` : '-' }}
-          </span>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-standard_degree="props">
-        <q-td :props="props">
-          <span>
-            {{
-              getSchoolDegreeValue(
-                props.row.student_type,
-                props.row.student_type === 'school'
-                  ? props.row.school_standard_id
-                  : props.row.college_degree_id,
-              )
-            }}
-          </span>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <div class="row justify-center items-center gap-12">
-            <div>
-              <q-btn
-                flat
-                dense
-                rounded
-                class="text-primary r-12"
-                @click="viewOtherDetails(props.row)"
+          <template #body-cell-status="props">
+            <q-td :props="props">
+              <span
+                class="px-10 py-5 r-20 text-capitalize"
+                :class="getStatusStyles(props.row.submission_status)"
               >
-                <q-icon name="visibility" class="font-20"></q-icon>
-                <base-tooltip>View Other Details</base-tooltip>
-              </q-btn>
-            </div>
-            <div>
-              <q-btn
-                flat
-                dense
-                rounded
-                class="text-primary r-12"
-                @click="openResultDialog(props.row)"
-              >
-                <q-icon name="assignment_turned_in" class="font-20"></q-icon>
-                <base-tooltip>Review Submission</base-tooltip>
-              </q-btn>
-            </div>
-          </div>
-        </q-td>
-      </template>
-    </q-table>
+                {{ props.row.submission_status }}
+              </span>
+            </q-td>
+          </template>
+
+          <template #body-cell-standard_degree="props">
+            <q-td :props="props">
+              {{
+                getSchoolDegreeValue(
+                  props.row.student_type,
+                  props.row.student_type === 'school'
+                    ? props.row.school_standard_id
+                    : props.row.college_degree_id,
+                )
+              }}
+            </q-td>
+          </template>
+
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <div class="row justify-center gap-5">
+                <q-btn flat round icon="visibility" size="sm" @click="viewOtherDetails(props.row)">
+                  <base-tooltip> View Details </base-tooltip>
+                </q-btn>
+
+                <q-btn flat round icon="rate_review" size="sm" @click="openResultDialog(props.row)">
+                  <base-tooltip> Review Submission </base-tooltip>
+                </q-btn>
+              </div>
+            </q-td>
+          </template>
+        </q-table>
+      </div>
+
+      <div v-if="groupedStudents.length === 0" class="text-center text-grey-7 q-py-xl">
+        No students found.
+      </div>
+    </div>
 
     <view-other-details-dialog v-model="blnShowStudentDetails" :student="objStudentDetails" />
     <confirmation-dialog v-model="blnShowConfirmationDialog" :status="strStatus" />
@@ -156,6 +141,13 @@
       :degree-options="[
         { label: 'All', value: null },
         ...arrDegreeData.map((item) => ({
+          label: item.value,
+          value: item.key,
+        })),
+      ]"
+      :board-options="[
+        { label: 'All', value: null },
+        ...arrBoardData.map((item) => ({
           label: item.value,
           value: item.key,
         })),
@@ -201,6 +193,7 @@ const blnLoading = ref(false)
 
 const arrStandardsData = ref([])
 const arrDegreeData = ref([])
+const arrBoardData = ref([])
 
 const blnShowStudentDetails = ref(false)
 const blnShowExportMenu = ref(false)
@@ -279,21 +272,31 @@ const applyFilters = (filters) => {
   }
 
   if (filters.standard) {
-    data = data.filter((student) => Number(student.school_standard_id) === Number(filters.standard))
+    data = data.filter((student) => student.school_standard_id === filters.standard)
   }
 
   if (filters.degree) {
-    data = data.filter((student) => Number(student.college_degree_id) === Number(filters.degree))
+    data = data.filter((student) => student.college_degree_id === filters.degree)
+  }
+
+  if (filters.year) {
+    data = data.filter((student) => student.result_year === filters.year)
+  }
+
+  if (filters.board) {
+    data = data.filter((student) => student.school_board_id === filters.board)
   }
 
   if (filters.rank) {
     const groupedData = {}
 
     data.forEach((student) => {
-      const groupKey =
+      const baseKey =
         student.student_type === 'school'
           ? `school_${student.school_standard_id}`
           : `college_${student.college_degree_id}`
+
+      const groupKey = student.semester ? `${baseKey}_sem${student.semester}` : baseKey
 
       if (!groupedData[groupKey]) {
         groupedData[groupKey] = []
@@ -305,15 +308,29 @@ const applyFilters = (filters) => {
     const rankedStudents = []
 
     Object.values(groupedData).forEach((group) => {
-      group
-        .sort((a, b) => Number(b.percentage) - Number(a.percentage))
-        .slice(0, Number(filters.rank))
-        .forEach((student, index) => {
-          rankedStudents.push({
-            ...student,
-            rank: index + 1,
-          })
-        })
+      const sortedGroup = [...group].sort((a, b) => Number(b.percentage) - Number(a.percentage))
+
+      let currentRank = 0
+      let previousPercentage = null
+
+      const rankedGroup = sortedGroup.map((student) => {
+        const percentage = Number(student.percentage)
+
+        if (percentage !== previousPercentage) {
+          currentRank += 1
+        }
+
+        previousPercentage = percentage
+
+        return {
+          ...student,
+          rank: currentRank,
+        }
+      })
+
+      const rankLimit = Number(filters.rank)
+
+      rankedStudents.push(...rankedGroup.filter((student) => student.rank <= rankLimit))
     })
 
     data = rankedStudents
@@ -338,6 +355,17 @@ const getDegrees = async () => {
 
   if (response?.status === 200) {
     arrDegreeData.value = response.data.data.map((item) => ({
+      key: item.key,
+      value: item.value,
+    }))
+  }
+}
+
+const getBoards = async () => {
+  const response = await api.get('/dropdowns/boards')
+
+  if (response?.status === 200) {
+    arrBoardData.value = response.data.data.map((item) => ({
       key: item.key,
       value: item.value,
     }))
@@ -412,25 +440,42 @@ const formatDateTime = (strDate) => {
 // }
 
 const exportExcel = () => {
-  const exportColumns = arrColumns.value.filter((column) => column.name !== 'actions')
+  const exportColumns = displayColumns.value.filter((column) => column.name !== 'actions')
 
   const headerRow = exportColumns.map((col) => col.label)
 
-  const bodyRows = arrStudentsData.value.map((row) =>
-    exportColumns.map((col) => getExportValue(row, col)),
-  )
+  const sheetData = []
 
-  const sheetData = [headerRow, ...bodyRows]
+  groupedStudents.value.forEach(([groupName, students]) => {
+    // Group Heading
+    sheetData.push([groupName])
+
+    // Table Header
+    sheetData.push(headerRow)
+
+    // Table Data
+    students.forEach((student) => {
+      sheetData.push(exportColumns.map((col) => getExportValue(student, col)))
+    })
+
+    // Empty row between groups
+    sheetData.push([])
+  })
 
   const worksheet = XLSX.utils.aoa_to_sheet(sheetData)
 
+  // Auto column width
   worksheet['!cols'] = exportColumns.map((col, index) => {
     const maxLength = Math.max(
       col.label.length,
-      ...bodyRows.map((row) => String(row[index] ?? '').length),
+      ...sheetData
+        .filter((row) => row.length > index)
+        .map((row) => String(row[index] ?? '').length),
     )
 
-    return { wch: maxLength + 2 }
+    return {
+      wch: maxLength + 2,
+    }
   })
 
   const workbook = XLSX.utils.book_new()
@@ -443,36 +488,43 @@ const exportExcel = () => {
 const exportPDF = () => {
   const doc = new jsPDF('landscape')
 
-  doc.setFont('NotoSansGujarati-Regular') // IMPORTANT
+  doc.setFont('NotoSansGujarati-Regular')
   doc.setFontSize(14)
   doc.text('Students Data', 14, 14)
 
-  const exportColumns = arrColumns.value.filter((column) => column.name !== 'actions')
+  const exportColumns = displayColumns.value.filter((column) => column.name !== 'actions')
 
   const headerRow = exportColumns.map((col) => col.label)
 
-  const bodyRows = arrStudentsData.value.map((row) =>
-    exportColumns.map((col) => getExportValue(row, col)),
-  )
+  let startY = 20
 
-  autoTable(doc, {
-    head: [headerRow],
-    body: bodyRows,
-    startY: 22,
-    horizontalPageBreak: true,
-    horizontalPageBreakRepeatHead: true,
-    tableWidth: 'auto',
-    styles: {
-      font: 'NotoSansGujarati-Regular',
-      fontSize: 8,
-      cellPadding: 2,
-      overflow: 'ellipsize',
-    },
-    headStyles: {
-      fillColor: [41, 128, 185],
-      textColor: 255,
-      fontStyle: 'bold',
-    },
+  groupedStudents.value.forEach(([groupName, students]) => {
+    doc.setFontSize(12)
+    doc.text(groupName, 14, startY)
+
+    const bodyRows = students.map((student) =>
+      exportColumns.map((col) => getExportValue(student, col)),
+    )
+
+    autoTable(doc, {
+      startY: startY + 5,
+      head: [headerRow],
+      body: bodyRows,
+      styles: {
+        font: 'NotoSansGujarati-Regular',
+        fontSize: 8,
+      },
+      headStyles: {
+        font: 'NotoSansGujarati-Regular',
+      },
+    })
+
+    startY = doc.lastAutoTable.finalY + 15
+
+    if (startY > 180) {
+      doc.addPage()
+      startY = 20
+    }
   })
 
   doc.save('students-data.pdf')
@@ -531,6 +583,50 @@ const arrKpiCardsData = computed(() => {
   ]
 })
 
+const groupedStudents = computed(() => {
+  const groups = new Map()
+
+  arrStudentsData.value.forEach((student) => {
+    const standardDegree = getSchoolDegreeValue(
+      student.student_type,
+      student.student_type === 'school' ? student.school_standard_id : student.college_degree_id,
+    )
+
+    const semesterLabel = student.semester ? `Semester ${student.semester}` : null
+
+    const key = semesterLabel ? `${standardDegree} - ${semesterLabel}` : standardDegree
+
+    if (!groups.has(key)) {
+      groups.set(key, [])
+    }
+
+    groups.get(key).push(student)
+  })
+
+  groups.forEach((students) => {
+    students.sort((a, b) => Number(b.percentage) - Number(a.percentage))
+  })
+
+  return Array.from(groups.entries())
+})
+
+const displayColumns = computed(() => {
+  const columns = [...arrColumns.value]
+
+  if (objFilters.value.rank) {
+    columns.unshift({
+      name: 'rank',
+      label: 'Rank',
+      field: 'rank',
+      align: 'center',
+      sortable: true,
+      headerStyle: 'width: 5%',
+    })
+  }
+
+  return columns
+})
+
 const arrColumns = ref([
   {
     name: 'student_name',
@@ -551,7 +647,7 @@ const arrColumns = ref([
   {
     name: 'student_type',
     label: 'Type',
-    field: (row) => row.student_type.toUpperCase(),
+    field: (row) => (row.student_type ? row.student_type.toUpperCase() : '-'),
     align: 'left',
     sortable: false,
     headerStyle: 'width: 5%',
@@ -643,7 +739,7 @@ onMounted(async () => {
   try {
     blnLoading.value = true
 
-    await Promise.all([getStandards(), getDegrees()])
+    await Promise.all([getStandards(), getDegrees(), getBoards()])
 
     await fetchStudentsData()
   } catch (error) {
