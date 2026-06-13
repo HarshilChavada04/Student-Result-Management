@@ -199,7 +199,7 @@
                   v-model="form.semester"
                   :arr-options="semesterOptions"
                   :label="t('semester')"
-                  mandatory
+                  :mandatory="form.college_degree_id !== 'other'"
                   min-width="100%"
                 />
                 <base-input v-model="form.university_name" :label="t('university')" />
@@ -215,7 +215,7 @@
               <base-input
                 v-model="form.percentage"
                 :label="t('percentage')"
-                mandatory
+                :mandatory="form.college_degree_id !== 'other'"
                 type="number"
                 min="0"
                 max="100"
