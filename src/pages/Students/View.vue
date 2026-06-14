@@ -63,7 +63,10 @@
 
     <div v-else>
       <div v-for="[groupName, students] in groupedStudents" :key="groupName" class="q-mb-xl">
-        <div class="text-h6 text-white text-center bg-primary">
+        <div
+          class="text-h6 text-white text-center bg-primary py-2"
+          style="border-radius: 10px 10px 0 0"
+        >
           {{ groupName }}
         </div>
 
@@ -766,5 +769,10 @@ onMounted(async () => {
   z-index: 10;
   background: white;
   padding: 10px 0;
+}
+
+:deep(th) {
+  color: var(--q-primary) !important;
+  font-weight: 600 !important;
 }
 </style>
