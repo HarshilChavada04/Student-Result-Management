@@ -541,7 +541,7 @@ const exportPDF = () => {
 }
 
 const arrKpiCardsData = computed(() => {
-  const students = arrStudentsData.value || []
+  const students = arrOriginalStudentsData.value || []
 
   const totalStudents = students.length
 

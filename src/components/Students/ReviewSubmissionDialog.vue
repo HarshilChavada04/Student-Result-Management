@@ -112,6 +112,17 @@
       <!-- Footer -->
       <q-card-actions v-if="student.submission_status === 'pending'" align="right" class="q-pa-md">
         <q-btn
+          v-if="auth.getUserInfo?.email === 'harshilc@gmail.com'"
+          color="info"
+          icon="delete"
+          label="Delete"
+          unelevated
+          @click="handleStatus('deleted')"
+          :loading="objLoading['deleted']"
+        >
+        </q-btn>
+
+        <q-btn
           color="negative"
           icon="close"
           label="Reject"
@@ -141,6 +152,7 @@
 <script setup>
 import { ref } from 'vue'
 import ConfirmationDialog from './ConfirmationDialog.vue'
+import { useAuthStore } from 'src/stores/auth.js'
 import { api } from 'src/boot/axios.js'
 import { showSuccess, showError } from 'src/boot/notification'
 
@@ -158,11 +170,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'status-change'])
 
+const auth = useAuthStore()
+
 const showConfirmationDialog = ref(false)
 const selectedStatus = ref('')
 const objLoading = ref({
   rejected: false,
   verified: false,
+  deleted: false,
 })
 
 const imageRotations = ref({})
@@ -215,7 +230,7 @@ ${props.student?.student_type === 'college' ? `🏫 સેમેસ્ટર: ${
 
 આપનો અભ્યાસ અને મહેનત બદલ અભિનંદન.
 
-- Result Management Team`
+- Ahir Samaj Result Management Team`
   } else {
     message = `❌ RESULT REJECTED
 
@@ -279,22 +294,27 @@ const handleStatus = (status) => {
 const handleConfirm = async (reason) => {
   try {
     const id = props.student.id
-    const action = selectedStatus.value === 'verified' ? 'approve' : 'reject'
 
     objLoading.value[selectedStatus.value] = true
-    await api
-      .patch(`/admin/submissions/${id}/${action}`, {
+
+    if (selectedStatus.value === 'deleted') {
+      const response = await api.delete(`/admin/submissions/${id}`)
+
+      if (response?.status === 200) {
+        showSuccess(response?.data?.message)
+      }
+    } else {
+      const action = selectedStatus.value === 'verified' ? 'approve' : 'reject'
+
+      const response = await api.patch(`/admin/submissions/${id}/${action}`, {
         rejection_reason: reason,
       })
-      .then((response) => {
-        if (response && response.status === 200) {
-          showSuccess(response?.data?.message)
-          openWhatsApp(selectedStatus.value, reason)
-        }
-      })
-      .finally(() => {
-        objLoading.value[selectedStatus.value] = false
-      })
+
+      if (response?.status === 200) {
+        showSuccess(response?.data?.message)
+        openWhatsApp(selectedStatus.value, reason)
+      }
+    }
 
     emit('status-change', {
       studentId: id,
@@ -305,6 +325,8 @@ const handleConfirm = async (reason) => {
     emit('update:modelValue', false)
   } catch (error) {
     showError(error)
+  } finally {
+    objLoading.value[selectedStatus.value] = false
   }
 }
 </script>

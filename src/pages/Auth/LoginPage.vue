@@ -117,6 +117,9 @@ const handleLogin = () => {
     .then((response) => {
       if (response && response.status === 200) {
         auth.setToken(response.data.token)
+        auth.setUserInfo({
+          email: strAdminEmailId.value,
+        })
         redirectTo('students')
         showSuccess('Login Successfully')
       }

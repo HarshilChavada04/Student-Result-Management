@@ -21,6 +21,11 @@
           mark this student as Verified?
         </p>
 
+        <p v-else-if="status === 'deleted'" class="confirm-message">
+          Are you sure you want to <br />
+          delete this student?
+        </p>
+
         <!-- Reject: textarea for reason -->
         <template v-else-if="status === 'rejected'">
           <p class="reason-label">
@@ -65,11 +70,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  // 'verified' | 'rejected'
   status: {
     type: String,
     required: true,
-    validator: (val) => ['verified', 'rejected'].includes(val),
+    validator: (val) => ['verified', 'rejected', 'deleted'].includes(val),
   },
 })
 
@@ -91,21 +95,33 @@ watch(show, (val) => {
 })
 
 const config = computed(() => {
-  if (props.status === 'verified') {
-    return {
-      title: 'Mark as Verified',
-      icon: 'check',
-      circleClass: 'circle-verified',
-      confirmLabel: 'Yes, Verify',
-      confirmClass: 'btn-verified',
-    }
-  }
-  return {
-    title: 'Mark as Rejected',
-    icon: 'close',
-    circleClass: 'circle-rejected',
-    confirmLabel: 'Reject',
-    confirmClass: 'btn-rejected',
+  switch (props.status) {
+    case 'verified':
+      return {
+        title: 'Mark as Verified',
+        icon: 'check',
+        circleClass: 'circle-verified',
+        confirmLabel: 'Yes, Verify',
+        confirmClass: 'btn-verified',
+      }
+
+    case 'deleted':
+      return {
+        title: 'Delete Student',
+        icon: 'delete',
+        circleClass: 'circle-deleted',
+        confirmLabel: 'Delete',
+        confirmClass: 'btn-deleted',
+      }
+
+    default:
+      return {
+        title: 'Mark as Rejected',
+        icon: 'close',
+        circleClass: 'circle-rejected',
+        confirmLabel: 'Reject',
+        confirmClass: 'btn-rejected',
+      }
   }
 })
 
@@ -225,5 +241,13 @@ const onConfirm = () => {
 
 .btn-rejected {
   background-color: #d32f2f !important;
+}
+
+.circle-deleted {
+  background-color: #ef4444;
+}
+
+.btn-deleted {
+  background-color: #ef4444 !important;
 }
 </style>

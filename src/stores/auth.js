@@ -37,6 +37,9 @@ export const useAuthStore = defineStore('auth', {
     getSideBarPreference(state) {
       return state.side_bar
     },
+    getUserInfo(state) {
+      return state.user_data
+    },
   },
   persist: true, // Optional: keeps auth data even after a refresh
 })
