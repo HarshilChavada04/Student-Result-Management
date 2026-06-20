@@ -80,7 +80,7 @@
       >
         <div class="form-inner" :class="$q.screen.lt.md ? 'column' : 'row full-height'">
           <!-- Personal Details -->
-          <div :class="$q.screen.lt.md ? 'col-auto' : 'col'" class="pa-20">
+          <div v-if="blnShowForm" :class="$q.screen.lt.md ? 'col-auto' : 'col'" class="pa-20">
             <div class="font-20 font-semibold text-primary section-header">
               {{ t('personalDetails') }}
             </div>
@@ -131,10 +131,10 @@
           </div>
 
           <!-- Separator -->
-          <q-separator :vertical="$q.screen.gt.sm" />
+          <q-separator v-if="blnShowForm" :vertical="$q.screen.gt.sm" />
 
           <!-- Academic Details -->
-          <div :class="$q.screen.lt.md ? 'col-auto' : 'col'" class="pa-20">
+          <div v-if="blnShowForm" :class="$q.screen.lt.md ? 'col-auto' : 'col'" class="pa-20">
             <div class="font-20 font-semibold text-primary section-header">
               {{ t('academicDetails') }}
             </div>
@@ -238,11 +238,68 @@
               />
             </div>
           </div>
+
+          <div
+            v-if="!blnShowForm"
+            class="column justify-center items-center full-width form-closed-wrap"
+            style="flex: 1"
+          >
+            <div class="form-closed-img-wrap">
+              <q-img
+                src="~src\assets\images\AASP-Form-Closed-Image.png"
+                class="form-closed-img"
+              ></q-img>
+            </div>
+            <div class="text-center form-closed-content">
+              <h1 class="form-closed-title">{{ t('formClosedTitle') }}</h1>
+              <p class="form-closed-description">
+                {{ t('formClosedDescription') }}
+              </p>
+              <p class="form-closed-description-secondary">
+                {{ t('formClosedDescriptionSecondary') }}
+              </p>
+              <q-separator class="my-30"></q-separator>
+              <div class="form-closed-contact">
+                <q-icon name="info" class="text-primary"></q-icon>
+                {{ t('formClosedContactPrefix') }}
+                <span class="no-wrap-text">
+                  {{ t('formClosedContactActionStart') }}
+                  <span class="form-closed-contact-link">{{ t('formClosedContactLink') }}</span>
+                  {{ t('formClosedContactActionEnd') }}
+                </span>
+              </div>
+            </div>
+            <div
+              class="admin-cards-row mt-20"
+              :class="$q.screen.lt.sm ? 'column gap-12 items-stretch' : 'row gap-16 justify-center'"
+            >
+              <div
+                v-for="(data, index) in arrAdminDetails"
+                :key="index"
+                class="admin-card r-10 row items-center cursor-pointer"
+                :class="$q.screen.lt.sm ? 'full-width' : 'col-grow'"
+                @click="callAdmin(data.phone)"
+              >
+                <div class="admin-card-icon">
+                  <q-icon name="account_circle" size="40px" class="text-primary"></q-icon>
+                </div>
+                <div class="col column gap-3 justify-center text-left admin-card-info">
+                  <div class="font-medium admin-card-name">
+                    {{ index + 1 }}. <span>{{ data.name }}</span>
+                  </div>
+                  <div class="admin-card-phone">
+                    <q-icon name="phone" size="16px" class="text-primary q-mr-xs"></q-icon>
+                    {{ data.phone }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </q-form>
 
       <!-- Footer Section -->
-      <div class="row justify-between mx-24 col-auto q-mb-md">
+      <div v-if="blnShowForm" class="row justify-between mx-24 col-auto q-mb-md">
         <base-btn
           variant="outline"
           :label="t('clearForm')"
@@ -293,6 +350,8 @@ const lang = ref('gu') // 'en' | 'gu'
 
 const formRef = ref(null)
 
+const blnShowForm = ref(false)
+
 const translations = {
   en: {
     orgName: 'Ahir Samaj',
@@ -324,6 +383,13 @@ const translations = {
     attachment: 'Attachment (Result)',
     clearForm: 'Clear Form',
     submitForm: 'Submit Form',
+    formClosedTitle: 'FORM CLOSED',
+    formClosedDescription: 'The deadline for the Student Submission Form has passed.',
+    formClosedDescriptionSecondary: 'Thank you for your interest and participation.',
+    formClosedContactPrefix: 'For any queries or assistance,',
+    formClosedContactActionStart: 'please',
+    formClosedContactLink: 'contact any of the administrators',
+    formClosedContactActionEnd: 'below. ',
   },
   gu: {
     orgName: 'આહિર સમાજ',
@@ -355,8 +421,30 @@ const translations = {
     attachment: 'જોડાણ (પરિણામ)',
     clearForm: 'ફોર્મ સાફ કરો',
     submitForm: 'ફોર્મ સબમિટ કરો',
+    formClosedTitle: 'ફોર્મ બંધ છે',
+    formClosedDescription: 'સ્ટુડન્ટ સબમિશન ફોર્મ માટેની છેલ્લી તારીખ પસાર થઈ ગઈ છે.',
+    formClosedDescriptionSecondary: 'તમારી રુચિ અને સહભાગિતા બદલ આભાર.',
+    formClosedContactPrefix: 'કોઈપણ પ્રશ્નો અથવા સહાય માટે,',
+    formClosedContactActionStart: 'કૃપા કરીને',
+    formClosedContactLink: 'નીચે આપેલા સંચાલકોમાંથી',
+    formClosedContactActionEnd: 'કોઈનો સંપર્ક કરો.',
   },
 }
+
+const arrAdminDetails = ref([
+  {
+    name: 'Maldebhai Maru',
+    phone: '9979099353',
+  },
+  {
+    name: 'Savanbhai Kandoriya',
+    phone: '9099477474',
+  },
+  {
+    name: 'Harshil Chavada',
+    phone: '6355732539',
+  },
+])
 
 const showConfirmDialog = ref(false)
 
@@ -367,6 +455,10 @@ const degreeOptions = ref([])
 /** Helper – returns the translated string for the current language */
 function t(key) {
   return translations[lang.value][key] ?? key
+}
+
+function callAdmin(phone) {
+  window.location.href = 'tel:' + phone
 }
 
 // ── Form state ────────────────────────────────────────────────────────────────
@@ -470,6 +562,8 @@ function handleClear() {
 }
 
 function getAllDropDownOptions() {
+  if (!blnShowForm.value) return
+
   blnLoading.value = true
 
   api
@@ -556,9 +650,13 @@ onMounted(() => {
 .form-card {
   border: 2px solid $border-color;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-inner {
+  flex: 1;
+  display: flex;
   &.row.full-height {
     height: 100%;
     .col {
@@ -567,7 +665,16 @@ onMounted(() => {
   }
   &.column {
     height: auto;
+    flex-direction: column;
   }
+}
+
+.form-closed-wrap {
+  padding: 24px 16px;
+  text-align: center;
+  width: 100%;
+  min-height: 100%;
+  flex: 1; // ensure it grows to fill parent flex space
 }
 
 .section-header {
@@ -633,5 +740,140 @@ onMounted(() => {
 
 .lang-swap-icon {
   flex-shrink: 0;
+}
+
+.form-closed-wrap {
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.form-closed-img-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.form-closed-img {
+  width: clamp(240px, 65vw, 320px);
+  height: auto;
+}
+
+.form-closed-content {
+  max-width: 480px;
+  padding: 0 8px;
+}
+
+/* Heading */
+.form-closed-title {
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #2f3a56;
+  margin: 12px 0 8px;
+}
+
+/* Description Line 1 */
+.form-closed-description {
+  font-size: clamp(14px, 3.5vw, 16px);
+  font-weight: 400;
+  line-height: 1.4;
+  color: #4f5d75;
+  margin-bottom: 4px;
+}
+
+/* Description Line 2 */
+.form-closed-description-secondary {
+  font-size: clamp(14px, 3.5vw, 16px);
+  font-weight: 400;
+  line-height: 1.4;
+  color: #4f5d75;
+}
+
+.form-closed-contact {
+  font-size: clamp(13px, 3.2vw, 16px);
+  font-weight: 500;
+  line-height: 1.5;
+  color: #5c6bc0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.no-wrap-text {
+  white-space: normal;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Contact Link */
+.form-closed-contact-link {
+  font-size: clamp(13px, 3.2vw, 16px);
+  font-weight: 600;
+  line-height: 1.5;
+  color: #4f46e5;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  white-space: normal;
+}
+.form-closed-contact-link:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+.admin-cards-row {
+  width: 100%;
+  max-width: 900px;
+  box-sizing: border-box;
+}
+
+.admin-card {
+  border: 2px solid #e0e0e0;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 10px 12px;
+  gap: 10px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+
+  &:hover {
+    border-color: $primary;
+    background-color: #f5f7ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  &:active {
+    transform: scale(0.98);
+    background-color: #eef1ff;
+  }
+}
+
+.admin-card-icon {
+  flex-shrink: 0; // prevents icon from being squeezed
+}
+
+.admin-card-info {
+  min-width: 0; // allows text to wrap/truncate instead of pushing card wider
+  overflow: hidden;
+}
+
+.admin-card-name,
+.admin-card-phone {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(13px, 3.5vw, 15px);
+}
+
+.col-grow {
+  flex: 1 1 240px;
 }
 </style>
